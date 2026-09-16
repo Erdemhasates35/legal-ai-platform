@@ -1,63 +1,48 @@
+import { DashboardShell } from "@/components/layout/DashboardShell";
+import { FileUploadZone } from "@/components/modules/FileUploadZone";
+import { VerificationPanel } from "@/components/modules/VerificationPanel";
+
 /**
- * Dosya Yükleme & Tarama Modülü
- * Free: temel yükleme + metin çıkarma
- * Pro++: UYAP/UDF yapılandırılmış analiz + yorumlama
- * Kullanıcıyı yormayan, tek tıkla çalışan tasarım
+ * Dosya & UYAP Çalışma Alanı – Phase 4
+ * Kurumsal, akademik, Baro seviyesinde arayüz
  */
 
 export default function FilesPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-5xl px-6 py-12">
-      <header className="mb-10">
-        <h1 className="text-3xl font-bold text-[hsl(var(--text-primary))]">
-          Dosya Yükleme & Tarama
-        </h1>
-        <p className="mt-2 text-[hsl(var(--text-secondary))]">
-          PDF · DOCX · UDF · e-Devlet çıktıları · Tek tıkla yükle, otomatik tanı
-        </p>
-      </header>
-
-      {/* Yükleme Alanı */}
-      <section className="plasma-card p-8">
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] bg-[hsl(var(--bg-tertiary))] px-6 py-16 text-center transition-colors hover:border-[hsl(var(--accent-muted))]">
-          <div className="mb-4 text-4xl text-[hsl(var(--accent))]">📄</div>
-          <p className="text-lg font-medium text-[hsl(var(--text-primary))]">
-            Dosyayı buraya sürükleyin veya tıklayın
+    <DashboardShell currentPath="/dashboard/files" userTier="free" userRole="user">
+      <div className="mx-auto max-w-4xl space-y-10">
+        <header>
+          <h1 className="text-2xl font-semibold tracking-tight text-[hsl(var(--text-primary))]">
+            Dosya Yükleme & UYAP / UDF Analizi
+          </h1>
+          <p className="mt-2 text-sm text-[hsl(var(--text-secondary))]">
+            PDF, DOCX ve UDF dosyalarını yükleyin. Free katmanda temel tarama,
+            Pro++ katmanda yapılandırılmış UYAP okuma ve çoklu ajan analizi aktif olur.
           </p>
-          <p className="mt-2 text-sm text-[hsl(var(--text-muted))]">
-            Desteklenen: PDF, UDF, DOCX · Maksimum 50 MB
+        </header>
+
+        <FileUploadZone userTier="free" />
+
+        <VerificationPanel
+          isValid={false}
+          confidence={0}
+          sourceIds={[]}
+          messageTr="Dosya yüklendikten sonra deontik ve kaynak doğrulaması burada görünecek."
+          messageEn="After file upload, deontic and source verification will appear here."
+        />
+
+        <section className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6">
+          <h2 className="text-sm font-semibold text-[hsl(var(--text-primary))]">
+            Akademik Not
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--text-secondary))]">
+            Her yüklenen belge sistemde bir <code className="rounded bg-[hsl(var(--bg-tertiary))] px-1.5 py-0.5 text-xs">source_id</code> ile
+            kayıt altına alınır. Doğrulanmayan hiçbir hukuki iddia üretilmez.
+            UYAP ve e-Devlet UDF dosyalarının yapılandırılmış ayrıştırılması yalnızca
+            Pro++ katmanında ve admin onayı almış kullanıcılara açıktır.
           </p>
-          <button className="plasma-button mt-6">
-            Dosya Seç
-          </button>
-        </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg bg-[hsl(var(--bg-secondary))] p-4">
-            <h3 className="font-medium text-[hsl(var(--text-primary))]">Free Katman</h3>
-            <ul className="mt-2 space-y-1 text-sm text-[hsl(var(--text-secondary))]">
-              <li>• Dosya yükleme</li>
-              <li>• Otomatik tür tanıma</li>
-              <li>• Temel metin çıkarma</li>
-              <li>• Deontik ön kontrol</li>
-            </ul>
-          </div>
-          <div className="rounded-lg bg-[hsl(var(--bg-secondary))] p-4">
-            <h3 className="font-medium text-[hsl(var(--accent))]">Pro++ Katman</h3>
-            <ul className="mt-2 space-y-1 text-sm text-[hsl(var(--text-secondary))]">
-              <li>• UYAP / UDF yapılandırılmış okuma</li>
-              <li>• Mahkeme · Esas · Karar no çıkarma</li>
-              <li>• Çoklu ajan yorumlama</li>
-              <li>• GNN emsal bağlantısı</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <p className="mt-8 text-center text-xs text-[hsl(var(--text-muted))]">
-        Yüklenen her dosya source_id ile kaydedilir. Hallüsinasyon riski taşıyan çıktı üretilmez.
-        UYAP derin analizi yalnızca Pro++ kullanıcılarına açıktır.
-      </p>
-    </main>
+        </section>
+      </div>
+    </DashboardShell>
   );
 }
