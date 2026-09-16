@@ -1,55 +1,83 @@
 # Legal AI Platform – Türk Hukuku + AİHM (ECHR)
 
-**Sıfır-Hallüsinasyon Hukuki Yapay Zeka Platformu**  
-Zero-Hallucination Legal AI Platform specialized for Turkish Law & European Court of Human Rights
+**Kaynak-doğrulamalı LegalTech platformu**  
+Turkish Law + European Court of Human Rights research and verification workspace.
 
-## Kısa Açıklama (Türkçe)
+## Platform ilkesi
 
-Bu platform, Türk mahkemeleri (Yargıtay, Danıştay, Anayasa Mahkemesi) ve Avrupa İnsan Hakları Mahkemesi (AİHM) içtihatlarını kullanarak hukuki iddiaları **üç katmanlı doğrulama** ile kontrol eder:
+Platformun doğrulama çekirdeği **fail-closed source provenance** yaklaşımı kullanır. Bir hukuki iddia doğrulanmış sonuç olarak işaretlenmeden önce:
 
-1. **Biçimsel Deontik Mantık Motoru** – Kanun maddelerini zorunluluk mantığına çevirir ve çelişki olup olmadığını matematiksel olarak kontrol eder.
-2. **Atıf Graf Sinir Ağı (GNN)** – Mahkeme kararlarını birbirine bağlayan bir grafik oluşturur ve en önemli emsalleri sıralar.
-3. **Kuantum-Esinli Tensor Arama (Q-NLP)** – Uzun belgelerdeki anlam bağlarını koruyarak arama yapar.
+1. İddia metni boş olmamalıdır.
+2. En az bir `source_id` bulunmalıdır.
+3. Her `source_id` kayıtlı olmalıdır.
+4. Her kaynak aktif olmalıdır.
+5. Kaynağın deontik formal ifadesi geçerli olmalıdır.
+6. Sonuç, doğrulanmış kaynak kümesini korumalıdır.
 
-Her iddia mutlaka bir kaynak kimliği (source_id) ile desteklenmek zorundadır. Desteklenmeyen iddialar reddedilir.
+Bu nedenle kaynaklandırılmamış veya doğrulanamayan bir iddia doğrulanmış hukuki sonuç olarak sunulmaz.
 
-## English Summary
+## Mevcut modüller
 
-Enterprise-grade LegalTech platform that eliminates LLM hallucinations through a triple-verification layer (Deontic Logic + Citation GNN + Q-NLP Tensor Retrieval). Supports both Turkish high-court precedents and ECHR judgments. Built with Next.js 14, TypeScript strict mode, Supabase (pgvector), and deployed on Vercel.
+- Google OAuth + Supabase SSR oturumu.
+- Admin onayı ve ilk yönetici bootstrap akışı.
+- Free ve Pro++ (`private`) yetkilendirme katmanları.
+- Özel Supabase Storage alanında kullanıcıya bağlı PDF/DOC/DOCX/UDF yükleme.
+- Yetkili, kısa ömürlü imzalı dosya erişimi.
+- Deterministik deontik doğrulama.
+- Kaynak kimliği zorunluluğu ve yapılandırılmış ret nedenleri.
+- Pro++ citation graph sıralaması.
+- Pro++ source-gated consortium ve analiz endpoint'i.
+- GitHub Actions kalite kapısı: lint, typecheck, doğrulama testleri ve build.
+- Pro-Plasma koyu kurumsal arayüz.
 
-## Hızlı Başlangıç (Quick Start)
+## Önemli sınır
+
+“Zero hallucination” burada mutlak bir matematiksel/evrensel garanti olarak kullanılmaz. Teknik olarak garanti edilen özellik, **doğrulanmamış çıktının doğrulanmış hukuki sonuç olarak kabul edilmemesidir**. Hukuki yorumun nihai değerlendirmesi profesyonel kullanıcıya aittir.
+
+## Hızlı başlangıç
 
 ```bash
 git clone https://github.com/Erdemhasates35/legal-ai-platform.git
 cd legal-ai-platform
 npm install
 cp .env.example .env.local
-# Supabase ve diğer anahtarları doldurun
 npm run dev
 ```
 
-## Canlı Bağlantılar (Live URLs)
+Gerekli ortam değişkenleri:
 
-- **GitHub Deposu:** https://github.com/Erdemhasates35/legal-ai-platform
-- **Vercel Üretim:** Deploy sonrası otomatik güncellenir
-- **Netlify Yedek:** İsteğe bağlı yedek dağıtım
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+ADMIN_BOOTSTRAP_EMAIL
+```
 
-## Teknoloji Yığını
+## Supabase
 
-| Katman              | Teknoloji                          |
-|---------------------|------------------------------------|
-| Frontend            | Next.js 14 (App Router) + React Server Components |
-| Dil                 | TypeScript 5+ (strict: true)       |
-| Stil                | TailwindCSS + Shadcn/UI            |
-| Veritabanı          | Supabase (PostgreSQL + pgvector)   |
-| Doğrulama           | Deontik Mantık + GNN + Multi-Agent |
-| CI/CD               | GitHub Actions → Vercel            |
+- Mevcut temel şema: `supabase/schema.sql`
+- Güvenlik migration'ı: `supabase/migrations/20260916_security_hardening.sql`
+- Google OAuth Supabase Auth üzerinden yapılandırılır.
+- `legal-files` bucket'ı private olmalıdır.
 
-## Akademik Temeller
+## Test ve kalite
 
-- Deontik mantık: von Wright formalizmi + SAT çözücüler
-- Atıf grafı: PageRank + betweenness centrality (hukuki emsal sıralaması)
-- Tensor retrieval: Uzun menzilli bağımlılıkları koruyan Q-NLP yaklaşımı
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+## Canlı bağlantılar
+
+- GitHub: https://github.com/Erdemhasates35/legal-ai-platform
+- Vercel proje alanı: https://vercel.com/erdemhasates-quantum-nexus/legal-ai-platform
+- Vercel production domain: https://legal-ai-platform-erdemhasates-quantum-nexus.vercel.app
+
+## Hukuki kaynaklar
+
+UYAP'ın resmi sistemi ve UDF/karar hizmetleri Adalet Bakanlığı UYAP altyapısı üzerinden sağlanır. Platform, kullanıcı tarafından yüklenen belgeleri ve uygulamaya kaydedilmiş kaynak kayıtlarını provenance zincirinde tutar; resmi UYAP hesabı yerine geçmez.
 
 ## Lisans
 
