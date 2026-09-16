@@ -7,13 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:deontic": "tsx scripts/validate-deontic.ts"
+    "typecheck": "tsc --noEmit",
+    "test:deontic": "tsx scripts/validate-deontic.ts",
+    "test:verification": "tsx scripts/validate-verification.ts",
+    "test": "npm run test:deontic && npm run test:verification"
   },
   "dependencies": {
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "@supabase/supabase-js": "^2.45.0",
+    "@supabase/ssr": "^0.12.7",
     "framer-motion": "^11.3.0",
     "lucide-react": "^0.424.0",
     "class-variance-authority": "^0.7.0",
