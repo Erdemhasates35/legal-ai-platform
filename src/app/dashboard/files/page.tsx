@@ -1,45 +1,39 @@
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { FileUploadZone } from "@/components/modules/FileUploadZone";
 import { VerificationPanel } from "@/components/modules/VerificationPanel";
+import { requireApprovedUser } from "@/lib/auth/guards";
+import { hasEntitlement } from "@/lib/auth/entitlements";
 
-/**
- * Dosya & UYAP Çalışma Alanı – Phase 4
- * Kurumsal, akademik, Baro seviyesinde arayüz
- */
+export const dynamic = "force-dynamic";
 
-export default function FilesPage() {
+export default async function FilesPage() {
+  const profile = await requireApprovedUser();
+  const pro = hasEntitlement(profile.tier, "uyapUdf");
+
   return (
-    <DashboardShell currentPath="/dashboard/files" userTier="free" userRole="user">
+    <DashboardShell currentPath="/dashboard/files" userTier={profile.tier} userRole={profile.role}>
       <div className="mx-auto max-w-4xl space-y-10">
         <header>
-          <h1 className="text-2xl font-semibold tracking-tight text-[hsl(var(--text-primary))]">
-            Dosya Yükleme & UYAP / UDF Analizi
-          </h1>
-          <p className="mt-2 text-sm text-[hsl(var(--text-secondary))]">
-            PDF, DOCX ve UDF dosyalarını yükleyin. Free katmanda temel tarama,
-            Pro++ katmanda yapılandırılmış UYAP okuma ve çoklu ajan analizi aktif olur.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[hsl(var(--text-primary))]">Dosya Yükleme & UYAP / UDF Analizi</h1>
+          <p className="mt-2 text-sm text-[hsl(var(--text-secondary))]">PDF, DOCX ve UDF belgeleri güvenli kullanıcı alanına yüklenir.</p>
         </header>
 
-        <FileUploadZone userTier="free" />
+        <FileUploadZone userTier={profile.tier} />
 
         <VerificationPanel
           isValid={false}
           confidence={0}
           sourceIds={[]}
-          messageTr="Dosya yüklendikten sonra deontik ve kaynak doğrulaması burada görünecek."
-          messageEn="After file upload, deontic and source verification will appear here."
+          messageTr="Doğrulama yalnızca kayıtlı ve aktif source_id kümesi üzerinden yapılır."
+          messageEn="Verification is performed only against registered and active source_id records."
         />
 
         <section className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6">
-          <h2 className="text-sm font-semibold text-[hsl(var(--text-primary))]">
-            Akademik Not
-          </h2>
+          <h2 className="text-sm font-semibold text-[hsl(var(--text-primary))]">Erişim kapsamı</h2>
           <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--text-secondary))]">
-            Her yüklenen belge sistemde bir <code className="rounded bg-[hsl(var(--bg-tertiary))] px-1.5 py-0.5 text-xs">source_id</code> ile
-            kayıt altına alınır. Doğrulanmayan hiçbir hukuki iddia üretilmez.
-            UYAP ve e-Devlet UDF dosyalarının yapılandırılmış ayrıştırılması yalnızca
-            Pro++ katmanında ve admin onayı almış kullanıcılara açıktır.
+            {pro
+              ? "Pro++: UYAP/UDF yapılandırılmış okuma, emsal grafı ve ileri analiz modülleri yetkiniz dahilindedir."
+              : "Free: güvenli dosya yükleme, temel tarama ve source_id/deontik doğrulama aktiftir. UYAP/UDF derin analiz Pro++ katmanındadır."}
           </p>
         </section>
       </div>
