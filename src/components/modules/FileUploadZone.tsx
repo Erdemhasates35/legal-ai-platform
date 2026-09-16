@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 /**
- * Gerçek dosya yükleme alanı – Phase 4
- * Free: temel yükleme + tür tanıma
- * Pro++: UYAP/UDF yapılandırılmış analiz hazırlığı
- *
- * Tasarım ilkesi: tek bakışta anlaşılır, minimum tıklama, kurumsal sakinlik
+ * Gerçek dosya yükleme alanı
+ * Free: temel yükleme
+ * Pro++: UYAP/UDF hazır
  */
 
 type UploadStatus = "idle" | "dragging" | "uploading" | "success" | "error";
@@ -32,7 +31,7 @@ export function FileUploadZone({ userTier = "free", onFileSelected }: FileUpload
   }, []);
 
   const processFile = useCallback(
-    (file: File) => {
+    async (file: File) => {
       const allowed = [
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -55,12 +54,40 @@ export function FileUploadZone({ userTier = "free", onFileSelected }: FileUpload
       setStatus("uploading");
       setErrorMessage(null);
 
-      // Gerçek Supabase Storage yüklemesi burada bağlanacak
-      // Şimdilik simülasyon + callback
-      setTimeout(() => {
+      try {
+        const {
+          data: { user }
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          setStatus("error");
+          setErrorMessage("Giriş yapmanız gerekiyor");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("userId", user.id);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          setStatus("error");
+          setErrorMessage(json.error ?? "Yükleme başarısız");
+          return;
+        }
+
         setStatus("success");
         onFileSelected?.(file);
-      }, 1200);
+      } catch {
+        setStatus("error");
+        setErrorMessage("Bağlantı hatası");
+      }
     },
     [onFileSelected]
   );
@@ -106,7 +133,7 @@ export function FileUploadZone({ userTier = "free", onFileSelected }: FileUpload
           disabled={status === "uploading"}
         />
 
-        {status === "idle" || status === "dragging" ? (
+        {(status === "idle" || status === "dragging") && (
           <>
             <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--bg-elevated))] text-2xl">
               📄
@@ -118,7 +145,7 @@ export function FileUploadZone({ userTier = "free", onFileSelected }: FileUpload
               PDF · DOCX · UDF · Maksimum 50 MB
             </p>
           </>
-        ) : null}
+        )}
 
         {status === "uploading" && (
           <div className="text-center">
@@ -145,7 +172,6 @@ export function FileUploadZone({ userTier = "free", onFileSelected }: FileUpload
         )}
       </div>
 
-      {/* Katman bilgilendirmesi */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5">
           <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--text-muted))]">
