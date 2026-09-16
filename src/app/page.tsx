@@ -6,46 +6,46 @@ export default function HomePage() {
           Legal AI Platform
         </h1>
         <p className="mt-4 text-lg text-[hsl(var(--text-secondary))]">
-          Sıfır-Hallüsinasyon Hukuki Yapay Zeka · Türk Hukuku + AİHM
+          Sıfır-Hallüsinasyon · Akademik Mükemmeliyet · Baro & Avukat Odaklı
         </p>
         <p className="mt-2 text-sm text-[hsl(var(--text-muted))]">
-          Zero-Hallucination Legal AI · Turkish Law + ECHR
+          Türk Hukuku + AİHM · Google Giriş · Admin Onayı · Free / Pro++
         </p>
       </div>
 
       <div className="grid w-full gap-5 sm:grid-cols-3">
         <div className="plasma-card p-6">
-          <h2 className="font-semibold text-[hsl(var(--text-primary))]">1. Deontik Mantık</h2>
+          <h2 className="font-semibold text-[hsl(var(--text-primary))]">Free Katman</h2>
           <p className="mt-3 text-sm text-[hsl(var(--text-secondary))]">
-            Kanun maddeleri biçimsel mantığa çevrilir ve SAT kontrolünden geçer.
+            Deontik doğrulama · Temel dosya yükleme · Otomatik tür tanıma
           </p>
         </div>
         <div className="plasma-card p-6">
-          <h2 className="font-semibold text-[hsl(var(--text-primary))]">2. Atıf Grafı (GNN)</h2>
+          <h2 className="font-semibold text-[hsl(var(--accent))]">Pro++ Katman</h2>
           <p className="mt-3 text-sm text-[hsl(var(--text-secondary))]">
-            Yargıtay / Danıştay / AYM / AİHM kararları graf olarak sıralanır.
+            UYAP/UDF derin okuma · GNN atıf grafı · Çoklu ajan · Q-NLP · Tam analiz
           </p>
         </div>
         <div className="plasma-card p-6">
-          <h2 className="font-semibold text-[hsl(var(--text-primary))]">3. Q-NLP Tensor</h2>
+          <h2 className="font-semibold text-[hsl(var(--text-primary))]">Yönetici</h2>
           <p className="mt-3 text-sm text-[hsl(var(--text-secondary))]">
-            Uzun belgelerdeki anlam bağları korunarak arama yapılır.
+            Onay · Ücret belirleme · Katman atama · Denetim kaydı
           </p>
         </div>
       </div>
 
       <div className="plasma-card w-full max-w-2xl p-6 text-center">
         <p className="text-sm text-[hsl(var(--text-secondary))]">
-          <span className="font-medium text-[hsl(var(--accent))]">Giriş:</span> Sadece Google hesabı ile.
+          <span className="font-medium text-[hsl(var(--accent))]">Giriş:</span> Sadece Google
           <br />
-          <span className="font-medium text-[hsl(var(--accent))]">Onay:</span> Yönetici (Admin) onayı olmadan erişim yok.
+          <span className="font-medium text-[hsl(var(--accent))]">Onay:</span> Admin onayı şart
           <br />
-          <span className="font-medium text-[hsl(var(--accent))]">Katmanlar:</span> Free (temel) · Private (tüm modüller + özel özellikler)
+          <span className="font-medium text-[hsl(var(--accent))]">Hedef:</span> Barolar, avukatlar ve akademik hukukçular için kurumsal seviye
         </p>
       </div>
 
       <p className="text-center text-xs text-[hsl(var(--text-muted))]">
-        Her iddia zorunlu olarak source_id ile doğrulanır. Doğrulanmayan çıktı üretilmez.
+        Her iddia source_id ile doğrulanır. Hallüsinasyon üretilmez. Mevcut hiçbir modül silinmedi.
       </p>
     </main>
   );
