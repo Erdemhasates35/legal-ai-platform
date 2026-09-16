@@ -5,34 +5,63 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: legal-ai-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
+    name: Quality / Typecheck / Test / Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
-          node-version: "20"
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm test
-      # Next.js production build includes the repository ESLint pass, type validation,
-      # route collection and server/client compilation; Vercel runs the same build.
-      - run: npm run build
+          node-version: "22"
+          cache: npm
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Production build
+        run: npm run build
 
   deploy:
+    name: Vercel Production Deploy
     needs: quality
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
-          node-version: "20"
-      - run: npm install
-      - run: npm run build
-      - uses: amondnet/vercel-action@v25
+          node-version: "22"
+          cache: npm
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify production build
+        run: npm run build
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
