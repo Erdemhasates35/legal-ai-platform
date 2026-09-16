@@ -1,8 +1,4 @@
-/**
- * Deterministic Deontic Logic Validator
- * Runs local SAT-style checks against formal expressions.
- * Usage: npx tsx scripts/validate-deontic.ts
- */
+import assert from "node:assert/strict";
 
 interface DeonticRule {
   id: string;
@@ -19,13 +15,11 @@ interface Claim {
 }
 
 function isSatisfiable(rule: DeonticRule, claim: Claim): boolean {
-  if (claim.claimedSourceIds.length === 0) {
-    return false;
-  }
-  if (!rule.formalExpression.includes("→") && !rule.formalExpression.includes("->")) {
-    return false;
-  }
-  return true;
+  return (
+    claim.proposition.trim().length > 0 &&
+    claim.claimedSourceIds.includes(rule.id) &&
+    (rule.formalExpression.includes("→") || rule.formalExpression.includes("->"))
+  );
 }
 
 const sampleRules: DeonticRule[] = [
@@ -33,35 +27,35 @@ const sampleRules: DeonticRule[] = [
     id: "TR-CMK-102",
     statuteCode: "CMK 102",
     formalExpression: "□ (tutukluluk_süresi > makul_süre → tahliye_zorunlu)",
-    naturalLanguageTr: "Tutukluluk süresi makul süreyi aşarsa tahliye zorunludur.",
-    naturalLanguageEn: "If detention exceeds a reasonable time, release is obligatory."
+    naturalLanguageTr: "Örnek deontik kural.",
+    naturalLanguageEn: "Example deontic rule."
   },
   {
     id: "ECHR-ART5",
     statuteCode: "AİHS m. 5",
     formalExpression: "□ (detention_exceeds_reasonable_time → violation_Art5)",
-    naturalLanguageTr: "Makul süreyi aşan tutukluluk AİHS m. 5 ihlalidir.",
-    naturalLanguageEn: "Detention exceeding reasonable time violates ECHR Article 5."
+    naturalLanguageTr: "Örnek ECHR kuralı.",
+    naturalLanguageEn: "Example ECHR rule."
   }
 ];
 
 const sampleClaim: Claim = {
   id: "claim-001",
-  proposition: "Sanığın tutukluluk süresi makul süreyi aşmıştır, tahliye edilmelidir.",
+  proposition: "Örnek iddia",
   claimedSourceIds: ["TR-CMK-102", "ECHR-ART5"]
 };
 
-function runValidation(): void {
-  console.log("=== Deontic Validation Report ===\n");
-  for (const rule of sampleRules) {
-    const valid = isSatisfiable(rule, sampleClaim);
-    console.log(`Rule: ${rule.statuteCode}`);
-    console.log(`  TR: ${rule.naturalLanguageTr}`);
-    console.log(`  EN: ${rule.naturalLanguageEn}`);
-    console.log(`  Result: ${valid ? "SATISFIABLE (geçerli)" : "UNSAT (reddedildi)"}`);
-    console.log("");
-  }
-  console.log("Tüm kontroller tamamlandı. Hallüsinasyon riski: Yok.");
+for (const rule of sampleRules) {
+  assert.equal(isSatisfiable(rule, sampleClaim), true);
 }
 
-runValidation();
+assert.equal(
+  isSatisfiable(sampleRules[0], { ...sampleClaim, claimedSourceIds: [] }),
+  false
+);
+assert.equal(
+  isSatisfiable(sampleRules[0], { ...sampleClaim, claimedSourceIds: ["UNKNOWN"] }),
+  false
+);
+
+console.log("deontic checks: PASS");
