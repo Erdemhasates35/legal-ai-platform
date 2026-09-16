@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Legal AI Platform | Türk Hukuku + AİHM",
-  description: "Sıfır-hallüsinasyon hukuki yapay zeka platformu – Yargıtay, Danıştay, AYM ve AİHM içtihatları"
+  description: "Sıfır-hallüsinasyon hukuki yapay zeka platformu – Yargıtay, Danıştay, AYM ve AİHM içtihatları. Google giriş + Admin onayı + Free/Private katmanlar."
 };
 
 export default function RootLayout({
@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <html lang="tr" className="dark">
+      <body className="min-h-screen antialiased">
         {children}
       </body>
     </html>
