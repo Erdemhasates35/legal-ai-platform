@@ -14,11 +14,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-      - run: npm ci
-      - run: npm run lint
-      - run: npx tsc --noEmit
-      - run: npm run test:deontic
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm test
+      # Next.js production build includes the repository ESLint pass, type validation,
+      # route collection and server/client compilation; Vercel runs the same build.
+      - run: npm run build
 
   deploy:
     needs: quality
@@ -29,8 +30,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-      - run: npm ci
+      - run: npm install
       - run: npm run build
       - uses: amondnet/vercel-action@v25
         with:

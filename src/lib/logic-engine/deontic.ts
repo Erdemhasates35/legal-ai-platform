@@ -1,83 +1,55 @@
 import type { DeonticRule, VerificationResult } from "@/types/legal";
 
 /**
- * Deterministic Deontic Logic Engine
- * Translates statutory rules into modal expressions and runs satisfiability checks.
- * Every claim MUST carry verified source_ids; otherwise it is rejected.
+ * Deterministic deontic gate.
+ * It verifies only explicit source binding and formal-expression structure.
+ * It does not infer facts that are absent from the supplied source records.
  */
 export function validateClaim(
-  _claimProposition: string,
+  claimProposition: string,
   claimedSourceIds: string[],
   rules: DeonticRule[]
 ): VerificationResult {
-  if (claimedSourceIds.length === 0) {
-    return {
-      isValid: false,
-      sourceIds: [],
-      deonticScore: 0,
-      gnnRank: 0,
-      confidence: 0,
-      messageTr: "Kaynak kimliği (source_id) bulunamadı. İddia reddedildi.",
-      messageEn: "No source_id provided. Claim rejected.",
-      rejectedReason: "MISSING_SOURCE_ID"
-    };
-  }
+  const claim = claimProposition.trim();
+  const sourceIds = Array.from(new Set(claimedSourceIds.map((id) => id.trim()).filter(Boolean)));
 
-  const matchedRules = rules.filter((r) => claimedSourceIds.includes(r.id) && r.isActive);
+  if (!claim) return rejected(sourceIds, "EMPTY_CLAIM", "İddia metni boş olamaz.", "Claim cannot be empty.");
+  if (sourceIds.length === 0) return rejected(sourceIds, "MISSING_SOURCE_ID", "source_id zorunludur; iddia reddedildi.", "source_id is required; claim rejected.");
 
-  if (matchedRules.length === 0) {
-    return {
-      isValid: false,
-      sourceIds: claimedSourceIds,
-      deonticScore: 0,
-      gnnRank: 0,
-      confidence: 0,
-      messageTr: "Belirtilen kaynaklar aktif deontik kurallarla eşleşmedi.",
-      messageEn: "Provided sources do not match any active deontic rules.",
-      rejectedReason: "NO_MATCHING_RULE"
-    };
-  }
+  const byId = new Map(rules.map((rule) => [rule.id, rule]));
+  const unknown = sourceIds.find((id) => !byId.has(id));
+  if (unknown) return rejected(sourceIds, "UNKNOWN_SOURCE_ID", `Kayıtlı olmayan source_id: ${unknown}`, `Unknown source_id: ${unknown}`);
 
-  // Lightweight satisfiability: every matched rule must contain an implication
-  const allSatisfiable = matchedRules.every(
-    (r) => r.formalExpression.includes("→") || r.formalExpression.includes("->")
-  );
+  const inactive = sourceIds.find((id) => !byId.get(id)!.isActive);
+  if (inactive) return rejected(sourceIds, "INACTIVE_SOURCE_ID", `Pasif source_id: ${inactive}`, `Inactive source_id: ${inactive}`);
 
-  if (!allSatisfiable) {
-    return {
-      isValid: false,
-      sourceIds: claimedSourceIds,
-      deonticScore: 0.2,
-      gnnRank: 0,
-      confidence: 0.2,
-      messageTr: "Deontik ifade geçersiz (implication eksik).",
-      messageEn: "Deontic expression invalid (missing implication).",
-      rejectedReason: "INVALID_FORMAL_EXPRESSION"
-    };
-  }
+  const invalid = sourceIds.find((id) => {
+    const expression = byId.get(id)!.formalExpression;
+    return !expression.includes("→") && !expression.includes("->");
+  });
+  if (invalid) return rejected(sourceIds, "INVALID_FORMAL_EXPRESSION", `Geçersiz deontik ifade: ${invalid}`, `Invalid deontic expression: ${invalid}`);
 
   return {
     isValid: true,
-    sourceIds: claimedSourceIds,
-    deonticScore: 0.95,
-    gnnRank: 0, // filled later by GNN layer
-    confidence: 0.92,
-    messageTr: "İddia deontik mantık katmanından başarıyla geçti. Kaynaklar doğrulandı.",
-    messageEn: "Claim passed the deontic logic layer. Sources verified."
+    sourceIds,
+    deonticScore: 1,
+    gnnRank: 0,
+    confidence: 1,
+    messageTr: "İddia açık source_id bağları ve geçerli deontik ifadelerle doğrulandı.",
+    messageEn: "Claim verified with explicit source_id bindings and valid deontic expressions."
   };
 }
 
-export function formalizeStatute(
-  statuteCode: string,
-  naturalTr: string,
-  naturalEn: string
-): DeonticRule {
-  // Production systems would use a proper parser; here we produce a standard obligation form
-  const formal = `□ (${statuteCode.replace(/\s+/g, "_")} → zorunlu_sonuç)`;
+function rejected(sourceIds: string[], reason: string, messageTr: string, messageEn: string): VerificationResult {
+  return { isValid: false, sourceIds, deonticScore: 0, gnnRank: 0, confidence: 0, messageTr, messageEn, rejectedReason: reason };
+}
+
+export function formalizeStatute(statuteCode: string, naturalTr: string, naturalEn: string): DeonticRule {
+  const normalized = statuteCode.replace(/\s+/g, "_");
   return {
     id: `AUTO-${statuteCode.replace(/\s+/g, "-")}`,
     statuteCode,
-    formalExpression: formal,
+    formalExpression: `□ (${normalized} → zorunlu_sonuç)`,
     naturalLanguageTr: naturalTr,
     naturalLanguageEn: naturalEn,
     sourceArticle: statuteCode,

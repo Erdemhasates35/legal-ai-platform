@@ -1,29 +1,8 @@
-/**
- * Supabase client – production ready skeleton
- * Gerçek anahtarlar .env.local / Vercel Environment Variables üzerinden gelir
- */
+import { createBrowserClient } from "@supabase/ssr";
 
-import { createClient } from "@supabase/supabase-js";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://tglfvmwhrpelbxfvofca.supabase.co";
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "sb_publishable_mnZ24RUHMq0nnVNWewQ6Bg_YHqgnCNV";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true
-  }
-});
-
-/**
- * Server-side client (Service Role) – sadece server actions / route handlers içinde kullanın
- */
-export function createServiceClient() {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  return createClient(supabaseUrl, serviceKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false
-    }
-  });
+export function getBrowserClient() {
+  return createBrowserClient(SUPABASE_URL, SUPABASE_KEY);
 }
