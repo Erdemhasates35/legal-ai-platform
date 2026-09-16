@@ -57,7 +57,7 @@ export function DashboardShell({
                 href={isLocked ? "#" : item.href}
                 className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors ${
                   isActive
-                    ? "bg-[hsl(var(--accent-muted))] text-[hsl(var(--accent))]")
+                    ? "bg-[hsl(var(--accent-muted))] text-[hsl(var(--accent))]"
                     : "text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--bg-tertiary))] hover:text-[hsl(var(--text-primary))]"
                 } ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
               >
