@@ -28,7 +28,7 @@ export interface AgentOpinion {
 
 export interface ConsortiumResult {
   overallValid: boolean;
-  consensusScore: number; // 0-1
+  consensusScore: number;
   opinions: AgentOpinion[];
   finalMessageTr: string;
   finalMessageEn: string;
@@ -40,7 +40,7 @@ export interface ConsortiumResult {
  * Şu an iskelet – tüm ajanlar source_id zorunluluğunu kontrol eder.
  */
 export function runConsortium(
-  claim: string,
+  _claim: string,
   sourceIds: string[],
   deonticResult: VerificationResult
 ): ConsortiumResult {
@@ -84,7 +84,7 @@ export function runConsortium(
     flags: deonticResult.isValid ? [] : ["DEONTIC_FAIL"]
   });
 
-  // 3. Prosecutor & Defense – dengeli görüş
+  // 3. Prosecutor & Defense
   opinions.push({
     role: "prosecutor",
     roleTr: "Savcı",
