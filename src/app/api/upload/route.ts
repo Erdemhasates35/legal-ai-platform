@@ -1,62 +1,62 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/client";
+import { createServerClient } from "@/lib/supabase/server";
+import { validateUpload } from "@/lib/file-processor/file-validation";
 
-/**
- * Gerçek dosya yükleme API
- * Supabase Storage'a yükler + user_files tablosuna kayıt eder
- */
-export async function POST(request: NextRequest) {
+export const runtime = "nodejs";
+
+function errorStatus(code: string) {
+  if (code === "FILE_TOO_LARGE" || code === "UNSUPPORTED_FILE_TYPE" || code === "MIME_EXTENSION_MISMATCH") {
+    return 400;
+  }
+  return 500;
+}
+
+export async function POST(request: Request) {
+  const supabase = await createServerClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_approved")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile?.is_approved) {
+    return NextResponse.json({ error: "APPROVAL_REQUIRED" }, { status: 403 });
+  }
+
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-    const userId = formData.get("userId") as string | null;
-
-    if (!file || !userId) {
-      return NextResponse.json(
-        { error: "Dosya veya kullanıcı kimliği eksik" },
-        { status: 400 }
-      );
+    const file = formData.get("file");
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "FILE_REQUIRED" }, { status: 400 });
     }
 
-    // Boyut kontrolü (50 MB)
-    if (file.size > 50 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "Dosya boyutu 50 MB sınırını aşıyor" },
-        { status: 400 }
-      );
-    }
+    const validated = validateUpload(file);
+    const service = createServiceClient();
+    const storagePath = `${user.id}/${validated.storageName}`;
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const ext = file.name.split(".").pop() ?? "bin";
-    const storagePath = `${userId}/${Date.now()}-${file.name}`;
-
-    // Storage'a yükle
-    const { error: uploadError } = await supabase.storage
-      .from("legal-files")
-      .upload(storagePath, file, {
-        contentType: file.type,
-        upsert: false
-      });
+    const { error: uploadError } = await service.storage.from("legal-files").upload(storagePath, file, {
+      contentType: file.type || "application/octet-stream",
+      upsert: false
+    });
 
     if (uploadError) {
-      return NextResponse.json(
-        { error: uploadError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "STORAGE_UPLOAD_FAILED" }, { status: 502 });
     }
 
-    // Veritabanına kayıt
-    const { data: record, error: dbError } = await supabase
+    const { data: record, error: dbError } = await service
       .from("user_files")
       .insert({
-        user_id: userId,
-        original_name: file.name,
+        user_id: user.id,
+        original_name: validated.safeName,
         storage_path: storagePath,
-        mime_type: file.type,
+        mime_type: file.type || "application/octet-stream",
         size_bytes: file.size,
         category: "general",
         is_private: true
@@ -65,19 +65,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      return NextResponse.json(
-        { error: dbError.message },
-        { status: 500 }
-      );
+      await service.storage.from("legal-files").remove([storagePath]);
+      return NextResponse.json({ error: "FILE_RECORD_FAILED" }, { status: 500 });
     }
 
-    return NextResponse.json({
-      success: true,
-      file: record,
-      message: "Dosya başarıyla yüklendi"
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Bilinmeyen hata";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ success: true, file: record });
+  } catch (error) {
+    const code = error instanceof Error ? error.message : "UPLOAD_FAILED";
+    return NextResponse.json({ error: code }, { status: errorStatus(code) });
   }
 }
