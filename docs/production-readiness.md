@@ -14,16 +14,17 @@
 - Deterministic precedent citation ranking.
 - Pro++ analysis endpoint gated by entitlement and verification.
 - Consortium gate that cannot mark an unverified claim as valid.
-- CI quality gate for lint, typecheck, tests and build.
+- CI quality gate for typecheck, tests and production build; the Next.js build performs the repository lint pass.
 
 ## Required runtime configuration
 
-Configure these values in the Vercel project environment, never in Git:
+Configure these values in the Vercel project environment when overriding the verified public defaults in code:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `ADMIN_BOOTSTRAP_EMAIL`
+
+No service-role credential is required by the application runtime. Database and Storage writes use the caller-scoped SSR client and RLS; the bootstrap operation is a restricted database function.
 
 Google OAuth provider configuration remains in Supabase Auth. The callback URL must point to `/auth/callback` on each configured application origin.
 
@@ -39,7 +40,7 @@ The repository contains deterministic checks in:
 - `scripts/validate-verification.ts`
 - `scripts/validate-production.ts`
 
-CI runs all three plus TypeScript, lint, and production build.
+CI runs all three plus TypeScript and production build.
 
 ## Legal-system boundary
 
@@ -47,4 +48,4 @@ The application is a research and verification system. It does not replace a law
 
 ## Deployment status
 
-Do not mark a release READY until the Vercel deployment reports `READY`, the Supabase project is active, the production environment variables exist, and the protected routes plus upload/verification endpoints have been exercised against the live deployment.
+A Vercel preview deployment for the hardened branch reached `READY` after a clean production build. Production should be considered live only after the main branch deployment and Google OAuth/runtime configuration are verified.
