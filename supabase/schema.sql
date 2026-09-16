@@ -185,3 +185,102 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- =====================================================
+-- 8. PRODUCTION SECURITY HARDENING (ADDITIVE)
+-- =====================================================
+
+CREATE SCHEMA IF NOT EXISTS private;
+REVOKE ALL ON SCHEMA private FROM PUBLIC;
+GRANT USAGE ON SCHEMA private TO authenticated;
+
+CREATE OR REPLACE FUNCTION private.is_admin(uid uuid DEFAULT auth.uid())
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = uid AND role = 'admin' AND is_approved = true);
+$$;
+
+CREATE OR REPLACE FUNCTION private.is_approved_user(uid uuid DEFAULT auth.uid())
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.profiles WHERE id = uid AND is_approved = true);
+$$;
+
+REVOKE ALL ON FUNCTION private.is_admin(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION private.is_approved_user(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION private.is_admin(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION private.is_approved_user(uuid) TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.handle_new_user() TO postgres, service_role;
+
+ALTER TABLE cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE precedents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deontic_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE echr_judgments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE echr_turkish_citations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins full access profiles" ON profiles;
+CREATE POLICY "Admins modify profiles" ON profiles FOR UPDATE TO authenticated USING ((select private.is_admin())) WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins insert profiles" ON profiles FOR INSERT TO authenticated WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins delete profiles" ON profiles FOR DELETE TO authenticated USING ((select private.is_admin()));
+
+DROP POLICY IF EXISTS "Users manage own files" ON user_files;
+CREATE POLICY "Users manage own files" ON user_files FOR ALL TO authenticated USING ((select auth.uid()) = user_id OR (select private.is_admin())) WITH CHECK ((select auth.uid()) = user_id OR (select private.is_admin()));
+
+DROP POLICY IF EXISTS "Approved users read cases" ON cases;
+DROP POLICY IF EXISTS "Admins manage cases" ON cases;
+CREATE POLICY "Approved users read cases" ON cases FOR SELECT TO authenticated USING ((select private.is_approved_user()));
+CREATE POLICY "Admins insert cases" ON cases FOR INSERT TO authenticated WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins update cases" ON cases FOR UPDATE TO authenticated USING ((select private.is_admin())) WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins delete cases" ON cases FOR DELETE TO authenticated USING ((select private.is_admin()));
+
+DROP POLICY IF EXISTS "Approved users read precedents" ON precedents;
+DROP POLICY IF EXISTS "Admins manage precedents" ON precedents;
+CREATE POLICY "Approved users read precedents" ON precedents FOR SELECT TO authenticated USING ((select private.is_approved_user()));
+CREATE POLICY "Admins insert precedents" ON precedents FOR INSERT TO authenticated WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins update precedents" ON precedents FOR UPDATE TO authenticated USING ((select private.is_admin())) WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins delete precedents" ON precedents FOR DELETE TO authenticated USING ((select private.is_admin()));
+
+DROP POLICY IF EXISTS "Approved users read deontic rules" ON deontic_rules;
+DROP POLICY IF EXISTS "Admins manage deontic rules" ON deontic_rules;
+CREATE POLICY "Approved users read deontic rules" ON deontic_rules FOR SELECT TO authenticated USING ((select private.is_approved_user()));
+CREATE POLICY "Admins insert deontic rules" ON deontic_rules FOR INSERT TO authenticated WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins update deontic rules" ON deontic_rules FOR UPDATE TO authenticated USING ((select private.is_admin())) WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins delete deontic rules" ON deontic_rules FOR DELETE TO authenticated USING ((select private.is_admin()));
+
+DROP POLICY IF EXISTS "Approved users read ECHR judgments" ON echr_judgments;
+DROP POLICY IF EXISTS "Admins manage ECHR judgments" ON echr_judgments;
+CREATE POLICY "Approved users read ECHR judgments" ON echr_judgments FOR SELECT TO authenticated USING ((select private.is_approved_user()));
+CREATE POLICY "Admins insert ECHR judgments" ON echr_judgments FOR INSERT TO authenticated WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins update ECHR judgments" ON echr_judgments FOR UPDATE TO authenticated USING ((select private.is_admin())) WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins delete ECHR judgments" ON echr_judgments FOR DELETE TO authenticated USING ((select private.is_admin()));
+
+DROP POLICY IF EXISTS "Approved users read ECHR Turkish citations" ON echr_turkish_citations;
+DROP POLICY IF EXISTS "Admins manage ECHR Turkish citations" ON echr_turkish_citations;
+CREATE POLICY "Approved users read ECHR Turkish citations" ON echr_turkish_citations FOR SELECT TO authenticated USING ((select private.is_approved_user()));
+CREATE POLICY "Admins insert ECHR Turkish citations" ON echr_turkish_citations FOR INSERT TO authenticated WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins update ECHR Turkish citations" ON echr_turkish_citations FOR UPDATE TO authenticated USING ((select private.is_admin())) WITH CHECK ((select private.is_admin()));
+CREATE POLICY "Admins delete ECHR Turkish citations" ON echr_turkish_citations FOR DELETE TO authenticated USING ((select private.is_admin()));
+
+CREATE INDEX IF NOT EXISTS idx_approval_logs_user ON approval_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_approval_logs_performed_by ON approval_logs(performed_by);
+CREATE INDEX IF NOT EXISTS idx_echr_turkish_citations_echr ON echr_turkish_citations(echr_id);
+CREATE INDEX IF NOT EXISTS idx_echr_turkish_citations_turkish ON echr_turkish_citations(turkish_precedent_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_approved_by ON profiles(approved_by);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
+
+INSERT INTO storage.buckets (id,name,public)
+VALUES ('legal-files','legal-files',false)
+ON CONFLICT (id) DO UPDATE SET public=false;
+
+DROP POLICY IF EXISTS "Users upload own legal files" ON storage.objects;
+CREATE POLICY "Users upload own legal files" ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (bucket_id='legal-files' AND (storage.foldername(name))[1]=(select auth.uid())::text AND (select private.is_approved_user()));
+
+DROP POLICY IF EXISTS "Users read own legal files" ON storage.objects;
+CREATE POLICY "Users read own legal files" ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id='legal-files' AND ((storage.foldername(name))[1]=(select auth.uid())::text OR (select private.is_admin())));
+
+DROP POLICY IF EXISTS "Users delete own legal files" ON storage.objects;
+CREATE POLICY "Users delete own legal files" ON storage.objects FOR DELETE TO authenticated
+USING (bucket_id='legal-files' AND ((storage.foldername(name))[1]=(select auth.uid())::text OR (select private.is_admin())));
+
+CREATE INDEX IF NOT EXISTS idx_precedents_target ON precedents(target_id);
