@@ -24,10 +24,11 @@ export function rankCitationGraph(edges: PrecedentEdge[]): CitationNode[] {
     nodes.set(target.id, target);
   }
 
-  const total = [...nodes.values()].reduce((sum, node) => sum + node.inboundWeight + node.outboundWeight, 0);
-  for (const node of nodes.values()) {
+  const nodeList = Array.from(nodes.values());
+  const total = nodeList.reduce((sum, node) => sum + node.inboundWeight + node.outboundWeight, 0);
+  for (const node of nodeList) {
     node.rank = total > 0 ? (node.inboundWeight * 2 + node.outboundWeight) / total : 0;
   }
 
-  return [...nodes.values()].sort((a, b) => b.rank - a.rank || a.id.localeCompare(b.id));
+  return nodeList.sort((a, b) => b.rank - a.rank || a.id.localeCompare(b.id));
 }
