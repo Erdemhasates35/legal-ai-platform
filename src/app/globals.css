@@ -2,12 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================
+   PRO-PLASMA DARK THEME
+   - Koyu, modern, kurumsal
+   - Uzun süre bakınca göz yormayan yumuşak kontrast
+   - Plasma tonları: derin lacivert + yumuşak mor + soğuk gri
+   ===================================================== */
+
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  /* Background layers – soft dark plasma */
+  --bg-primary: 222 47% 6%;
+  --bg-secondary: 222 40% 9%;
+  --bg-tertiary: 222 35% 12%;
+  --bg-elevated: 222 30% 14%;
+
+  /* Text – yüksek okunabilirlik, düşük yorgunluk */
+  --text-primary: 210 40% 96%;
+  --text-secondary: 215 20% 72%;
+  --text-muted: 215 15% 55%;
+
+  /* Accent – Pro Plasma (yumuşak mor-mavi) */
+  --accent: 250 70% 60%;
+  --accent-hover: 250 75% 68%;
+  --accent-muted: 250 40% 25%;
+
+  /* Borders & dividers */
+  --border: 222 25% 18%;
+  --border-strong: 222 20% 25%;
+
+  /* Status */
+  --success: 150 60% 45%;
+  --warning: 40 90% 55%;
+  --danger: 0 70% 55%;
+
+  /* Card & surface */
+  --card: 222 35% 10%;
+  --card-hover: 222 30% 13%;
 }
 
 body {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
+  background-color: hsl(var(--bg-primary));
+  color: hsl(var(--text-primary));
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar – soft plasma style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--bg-secondary));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-strong));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent-muted));
+}
+
+/* Utility classes for Plasma surfaces */
+.plasma-card {
+  @apply rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-lg shadow-black/20;
+}
+
+.plasma-card:hover {
+  @apply bg-[hsl(var(--card-hover))] border-[hsl(var(--border-strong))];
+}
+
+.plasma-button {
+  @apply rounded-lg bg-[hsl(var(--accent))] px-4 py-2 text-sm font-medium text-white transition-colors;
+}
+
+.plasma-button:hover {
+  @apply bg-[hsl(var(--accent-hover))];
+}
+
+.plasma-input {
+  @apply w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--bg-tertiary))] px-3 py-2 text-sm text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-muted))] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--accent))];
 }
