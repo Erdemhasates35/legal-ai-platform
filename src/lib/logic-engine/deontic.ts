@@ -6,7 +6,7 @@ import type { DeonticRule, VerificationResult } from "@/types/legal";
  * Every claim MUST carry verified source_ids; otherwise it is rejected.
  */
 export function validateClaim(
-  claimProposition: string,
+  _claimProposition: string,
   claimedSourceIds: string[],
   rules: DeonticRule[]
 ): VerificationResult {
