@@ -19,6 +19,14 @@ export default async function VerificationPage() {
   const sourceIds = (files ?? []).map((f) => f.id);
   const hasSources = sourceIds.length > 0;
 
+  const messageTr = hasSources
+    ? `${sourceIds.length} kayıtlı kaynak (dosya) bulundu. İddia doğrulaması için Dava Analizi modülünde source_id kullanın.`
+    : "Henüz yüklenmiş dosya yok. Önce Dosya & UYAP üzerinden belge yükleyin.";
+
+  const messageEn = hasSources
+    ? `${sourceIds.length} registered source file(s). Use source_id in Case Analysis.`
+    : "No uploaded files yet. Upload via Files & UYAP first.";
+
   return (
     <DashboardShell
       currentPath="/dashboard/verification"
@@ -40,16 +48,8 @@ export default async function VerificationPage() {
           isValid={hasSources}
           confidence={hasSources ? 1 : 0}
           sourceIds={sourceIds}
-          messageTr={{
-            hasSources
-              ? `${sourceIds.length} kayıtlı kaynak (dosya) bulundu. İddia doğrulaması için Dava Analizi modülünde source_id kullanın.`
-              : "Henüz yüklenmiş dosya yok. Önce Dosya & UYAP üzerinden belge yükleyin."
-          }}
-          messageEn={{
-            hasSources
-              ? `${sourceIds.length} registered source file(s). Use source_id in Case Analysis.`
-              : "No uploaded files yet. Upload via Files & UYAP first."
-          }}
+          messageTr={messageTr}
+          messageEn={messageEn}
         />
 
         <section className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6">
@@ -74,7 +74,8 @@ export default async function VerificationPage() {
                     </p>
                   </div>
                   <p className="text-xs text-[hsl(var(--text-muted))]">
-                    {f.mime_type ?? "—"} · {f.size_bytes ? `${Math.round(f.size_bytes / 1024)} KB` : ""}
+                    {f.mime_type ?? "—"}
+                    {f.size_bytes ? ` · ${Math.round(Number(f.size_bytes) / 1024)} KB` : ""}
                   </p>
                 </li>
               ))}
