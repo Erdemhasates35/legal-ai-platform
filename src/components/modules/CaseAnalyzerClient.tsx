@@ -31,26 +31,34 @@ export function CaseAnalyzerClient() {
         body: JSON.stringify({ claim, sourceIds: ids }),
       });
       const json = await res.json();
+      const v = json.verification;
+
       if (!res.ok) {
-        setError(json.error ?? "Analiz başarısız");
+        setError(
+          typeof json.error === "string"
+            ? json.error
+            : v?.messageTr ?? "Analiz başarısız"
+        );
         setResult({
           isValid: false,
-          confidence: 0,
-          sourceIds: ids,
+          confidence: Number(v?.confidence ?? 0),
+          sourceIds: v?.sourceIds ?? ids,
           messageTr:
-            "Doğrulama reddedildi. source_id aktif deontik kural kümesinde olmalı veya claim boş olmamalı.",
-          messageEn: "Verification rejected. Check source_id and claim.",
+            v?.messageTr ??
+            "Doğrulama reddedildi. source_id Doğrulama Panelindeki dosya UUID olmalı.",
+          messageEn: v?.messageEn ?? "Verification rejected.",
         });
         return;
       }
+
       setResult({
-        isValid: Boolean(json.verified),
-        confidence: json.verification?.confidence ?? (json.verified ? 1 : 0),
-        sourceIds: json.sourceIds ?? ids,
-        messageTr: json.verified
-          ? "Kaynak bağlı doğrulama geçti."
-          : "Doğrulama geçmedi.",
-        messageEn: json.evidencePolicy ?? "",
+        isValid: Boolean(json.verified ?? v?.isValid),
+        confidence: Number(v?.confidence ?? (json.verified ? 1 : 0)),
+        sourceIds: json.sourceIds ?? v?.sourceIds ?? ids,
+        messageTr:
+          v?.messageTr ??
+          (json.verified ? "Kaynak bağlı doğrulama geçti." : "Doğrulama geçmedi."),
+        messageEn: v?.messageEn ?? json.evidencePolicy ?? "",
       });
     } catch {
       setError("Bağlantı hatası");
@@ -61,7 +69,7 @@ export function CaseAnalyzerClient() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 space-y-4">
+      <div className="space-y-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6">
         <div>
           <label className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--text-muted))]">
             Hukuki iddia / özet
