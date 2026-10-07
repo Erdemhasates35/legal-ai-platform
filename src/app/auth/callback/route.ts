@@ -30,8 +30,11 @@ export async function GET(request: Request) {
   if (error) {
     const url = new URL("/auth/login", requestUrl.origin);
     url.searchParams.set("error", "code_exchange_failed");
+    url.searchParams.set("error_description", error.message);
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const origin = forwardedHost ? `https://${forwardedHost}` : requestUrl.origin;
+  return NextResponse.redirect(new URL(next, origin));
 }
