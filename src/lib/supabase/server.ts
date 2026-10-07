@@ -1,14 +1,12 @@
 import { createServerClient as createSupabaseServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ??
-  "https://qxfvpcjvoiantjrkorsa.supabase.co";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-const SUPABASE_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-  "sb_publishable_XIl3JwkBJmBc1Fl2GIHqew_zHggmAjr";
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error("Missing Supabase server environment configuration");
+}
 
 export async function createServerClient() {
   const cookieStore = await cookies();
