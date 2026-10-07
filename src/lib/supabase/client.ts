@@ -1,13 +1,11 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ??
-  "https://qxfvpcjvoiantjrkorsa.supabase.co";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-const SUPABASE_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-  "sb_publishable_XIl3JwkBJmBc1Fl2GIHqew_zHggmAjr";
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error("Missing Supabase browser environment configuration");
+}
 
 export function getBrowserClient() {
   return createBrowserClient(SUPABASE_URL, SUPABASE_KEY);
