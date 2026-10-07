@@ -205,10 +205,12 @@ export function CaseAnalyzerClient() {
             )}
           </div>
           {docInsight.preview ? (
-            <div className="flex justify-end"><button type="button" onClick={copyPreview} disabled={!docInsight.preview} className="rounded-md border border-[hsl(var(--border))] px-3 py-1.5 text-xs font-medium text-[hsl(var(--text-secondary))] transition hover:border-[hsl(var(--accent-muted))] hover:text-[hsl(var(--accent))] disabled:opacity-50">{copied ? "Kopyalandı" : "Metni kopyala"}</button></div>
+            <div className="space-y-2">
+              <div className="flex justify-end"><button type="button" onClick={copyPreview} disabled={!docInsight.preview} className="rounded-md border border-[hsl(var(--border))] px-3 py-1.5 text-xs font-medium text-[hsl(var(--text-secondary))] transition hover:border-[hsl(var(--accent-muted))] hover:text-[hsl(var(--accent))] disabled:opacity-50">{copied ? "Kopyalandı" : "Metni kopyala"}</button></div>
             <pre className="legal-reading-surface max-h-72 overflow-auto rounded-lg bg-[hsl(var(--bg-tertiary))] p-5 text-sm leading-7 text-[hsl(var(--text-secondary))] whitespace-pre-wrap select-text">
               {docInsight.preview}
             </pre>
+            </div>
           ) : (
             <p className="text-sm text-[hsl(var(--text-muted))]">
               Metin çıkarılamadı (tarama PDF olabilir).
