@@ -9,7 +9,8 @@ const j=await r.json(); if(!r.ok)throw new Error(j.detail||j.error||"Oluşturma 
 const s=await fetch("/api/courtroom/simulate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:j.session.id})});
 const sj=await s.json(); if(!s.ok)throw new Error(sj.detail||sj.error||"Simülasyon başarısız"); setResult({...j,...sj});
 }catch(e){setError(e instanceof Error?e.message:"Beklenmeyen hata")}finally{setBusy(false)}}
-return (\n<main className="min-h-screen bg-[hsl(var(--bg-primary))] px-6 py-10 text-[hsl(var(--text-primary))]"><div className="mx-auto max-w-7xl space-y-8">
+return (
+<main className="min-h-screen bg-[hsl(var(--bg-primary))] px-6 py-10 text-[hsl(var(--text-primary))]"><div className="mx-auto max-w-7xl space-y-8">
 <header><p className="text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--accent))]">GLOBAL COURTROOM</p><h1 className="mt-2 text-3xl font-semibold">Proceeding-First Mahkeme Katmanı</h1><p className="mt-2 max-w-3xl text-sm text-[hsl(var(--text-secondary))]">Belge olmadan olay anlatımıyla başlayın. Belgeler sonradan delil ve provenans kaynağı olarak bağlanır.</p></header>
 <section className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]"><div className="plasma-card p-6 space-y-5">
 <input className="w-full rounded-xl border p-3 bg-transparent" placeholder="Davanın başlığı" value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/>
