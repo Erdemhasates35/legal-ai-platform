@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
   const supabase = await createServerClient();
   const {data: proceeding, error: proceedingError} = await supabase.from("proceedings").insert({
-    title, proceeding_type:proceedingType, description, legal_question, created_by:profile.id, status:"active"
+    title, proceeding_type:proceedingType, description, legal_question: legalQuestion, created_by:profile.id, status:"active"
   }).select("id,title,proceeding_type,status").single();
   if (proceedingError || !proceeding) return NextResponse.json({error:"PROCEEDING_CREATE_FAILED",detail:proceedingError?.message},{status:500});
 
