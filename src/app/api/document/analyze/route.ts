@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/guards";
 import { hasEntitlement } from "@/lib/auth/entitlements";
 import { createServerClient } from "@/lib/supabase/server";
-import { extractDocumentText, claimDocumentOverlap } from "@/lib/file-processor/extract-text";
+import { claimDocumentOverlap } from "@/lib/file-processor/extract-text";
+import { extractDocumentTextEnhanced } from "@/lib/file-processor/enhanced-extract";
 import { detectUyapStructure } from "@/lib/file-processor/uyap-udf";
 
 export const runtime = "nodejs";
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
   }
 
   const buffer = Buffer.from(await blob.arrayBuffer());
-  const extracted = extractDocumentText(buffer, fileRow.original_name, fileRow.mime_type);
+  const extracted = await extractDocumentTextEnhanced(buffer, fileRow.original_name, fileRow.mime_type);
   const structure = detectUyapStructure(extracted.text || fileRow.original_name);
   const overlap =
     claim.length > 0
