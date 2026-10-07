@@ -12,7 +12,7 @@ function getRequiredEnv(
 const SUPABASE_URL = getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL");
 const SUPABASE_KEY = getRequiredEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
 
-const protectedPaths = ["/dashboard", "/admin"];
+const protectedPaths = ["/dashboard", "/admin", "/courtroom"];
 
 function isProtected(pathname: string) {
   return protectedPaths.some(
