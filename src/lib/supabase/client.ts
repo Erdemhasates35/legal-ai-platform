@@ -1,17 +1,21 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ??
-  "https://qxfvpcjvoiantjrkorsa.supabase.co";
-
-const SUPABASE_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-  "sb_publishable_XIl3JwkBJmBc1Fl2GIHqew_zHggmAjr";
-
-export function getBrowserClient() {
-  return createBrowserClient(SUPABASE_URL, SUPABASE_KEY);
+function getRequiredEnv(name: "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required Supabase environment variable: ${name}`);
+  return value;
 }
 
-/** Geriye uyumluluk */
-export const supabase = getBrowserClient();
+export function getBrowserClient() {
+  return createBrowserClient(
+    getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    getRequiredEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+  );
+}
+
+/** Geriye uyumluluk: istemci yalnızca ilk gerçek erişimde oluşturulur. */
+export const supabase = new Proxy({} as ReturnType<typeof getBrowserClient>, {
+  get(_target, property) {
+    return getBrowserClient()[property as keyof ReturnType<typeof getBrowserClient>];
+  },
+});
