@@ -27,6 +27,8 @@ function cleanText(value: unknown, max = 20000) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+function parseLines(value: string) { return value.split("\n").map(line => line.trim()).filter(Boolean); }
+
 function parseParticipants(value: string) {
   return value.split("\n").map(line => line.trim()).filter(Boolean).map(line => {
     const [name, role = "other", represented_party = ""] = line.split("|").map(x => x.trim());
@@ -44,6 +46,11 @@ export async function POST(request: Request) {
   const description = cleanText(body.description);
   const legalQuestion = cleanText(body.legal_question, 5000);
   const participants = parseParticipants(cleanText(body.participants, 10000));
+  const statements = parseLines(cleanText(body.statements, 10000));
+  const claims = parseLines(cleanText(body.claims, 10000));
+  const defences = parseLines(cleanText(body.defences, 10000));
+  const requests = parseLines(cleanText(body.requests, 10000));
+  const evidence = parseLines(cleanText(body.evidence, 10000));
   if (!title) return NextResponse.json({error:"TITLE_REQUIRED"},{status:422});
 
   const supabase = await createServerClient();
