@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 export default function CourtroomClient(){
-const [form,setForm]=useState({title:"",proceeding_type:"criminal",description:"",legal_question:"",participants:""});
+const [form,setForm]=useState({title:"",proceeding_type:"criminal",description:"",legal_question:"",participants:"",statements:"",claims:"",defences:"",requests:"",evidence:""});
 const [busy,setBusy]=useState(false); const [result,setResult]=useState<any>(null); const [error,setError]=useState("");
 async function start(){setBusy(true);setError("");setResult(null);try{
 const r=await fetch("/api/courtroom/proceedings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});
@@ -17,6 +17,11 @@ return <main className="min-h-screen bg-[hsl(var(--bg-primary))] px-6 py-10 text
 <textarea className="min-h-40 w-full rounded-xl border p-3 bg-transparent" placeholder="Olayları kendi sözlerinizle anlatın. Bilinmeyenleri kesin gerçek gibi yazmayın." value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/>
 <textarea className="min-h-24 w-full rounded-xl border p-3 bg-transparent" placeholder="Hukuki soru / uyuşmazlık" value={form.legal_question} onChange={e=>setForm({...form,legal_question:e.target.value})}/>
 <textarea className="min-h-24 w-full rounded-xl border p-3 bg-transparent" placeholder={"Kişi adı|rol|temsil edilen taraf\nAli Veli|defendant|"} value={form.participants} onChange={e=>setForm({...form,participants:e.target.value})}/>
+<textarea className="min-h-20 w-full rounded-xl border p-3 bg-transparent" placeholder="Beyanlar — her satır bir beyan" value={form.statements} onChange={e=>setForm({...form,statements:e.target.value})}/>
+<textarea className="min-h-20 w-full rounded-xl border p-3 bg-transparent" placeholder="İddialar — her satır bir iddia" value={form.claims} onChange={e=>setForm({...form,claims:e.target.value})}/>
+<textarea className="min-h-20 w-full rounded-xl border p-3 bg-transparent" placeholder="Savunmalar — her satır bir savunma" value={form.defences} onChange={e=>setForm({...form,defences:e.target.value})}/>
+<textarea className="min-h-20 w-full rounded-xl border p-3 bg-transparent" placeholder="Talepler — her satır bir talep" value={form.requests} onChange={e=>setForm({...form,requests:e.target.value})}/>
+<textarea className="min-h-20 w-full rounded-xl border p-3 bg-transparent" placeholder="Deliller — her satır bir delil; başlangıçta UNKNOWN" value={form.evidence} onChange={e=>setForm({...form,evidence:e.target.value})}/>
 <button disabled={busy||!form.title} onClick={start} className="w-full rounded-xl bg-[hsl(var(--accent))] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy?"Mahkeme simülasyonu yürütülüyor…":"Mahkeme Katmanını Başlat"}</button>
 {error&&<p className="text-sm text-[hsl(var(--danger))]">{error}</p>}</div>
 <aside className="plasma-card p-6"><h2 className="font-semibold">Yargısal roller</h2><div className="mt-4 space-y-3 text-sm text-[hsl(var(--text-secondary))]">{["Türk Hakimi","Türk Cumhuriyet Savcısı","Savunma Avukatı","AYM/AİHM Uzmanı","Delil ve Adli Analiz Uzmanı","Akademik Hukuk Araştırmacısı"].map(x=><div key={x} className="rounded-lg border p-3">{x}</div>)}</div></aside></section>
