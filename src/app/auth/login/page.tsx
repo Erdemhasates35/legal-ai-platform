@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { getBrowserClient } from "@/lib/supabase/client";
 
 /**
@@ -8,8 +9,15 @@ import { getBrowserClient } from "@/lib/supabase/client";
  * Sadece Google OAuth – ekstra form yok, kullanıcıyı yormaz
  */
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const code = searchParams.get("error");
+    const description = searchParams.get("error_description");
+    if (code) setError(description || `Giriş başarısız: ${code}`);
+  }, [searchParams]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
