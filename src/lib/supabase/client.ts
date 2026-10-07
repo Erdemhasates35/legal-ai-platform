@@ -1,14 +1,16 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  throw new Error("Missing Supabase browser environment configuration");
+function getRequiredEnv(name: "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required Supabase environment variable: ${name}`);
+  return value;
 }
 
 export function getBrowserClient() {
-  return createBrowserClient(SUPABASE_URL, SUPABASE_KEY);
+  return createBrowserClient(
+    getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    getRequiredEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+  );
 }
 
 /** Geriye uyumluluk */
