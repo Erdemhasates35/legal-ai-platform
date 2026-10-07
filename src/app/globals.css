@@ -84,3 +84,30 @@ body {
 .plasma-input {
   @apply w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--bg-tertiary))] px-3 py-2 text-sm text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-muted))] focus:border-[hsl(var(--accent))] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--accent))];
 }
+
+
+/* Academic reading ergonomics: restrained contrast, focus visibility, and selectable long-form text. */
+.legal-reading-surface {
+  max-width: 78ch;
+  font-variant-numeric: tabular-nums;
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--accent-hover));
+  outline-offset: 3px;
+}
+
+::selection {
+  background: hsl(var(--accent-muted));
+  color: hsl(var(--text-primary));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
