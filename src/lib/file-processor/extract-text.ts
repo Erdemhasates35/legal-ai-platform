@@ -6,7 +6,7 @@
 
 export interface ExtractResult {
   text: string;
-  method: "pdf-stream" | "udf-xml" | "utf8-fallback" | "empty";
+  method: "pdf-stream" | "pdf-library" | "udf-xml" | "docx-text" | "utf8-fallback" | "empty";
   charCount: number;
   warnings: string[];
 }
