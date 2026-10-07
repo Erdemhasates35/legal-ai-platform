@@ -75,7 +75,43 @@ export async function POST(request: Request) {
   }
 
   if (legalQuestion) {
-    await supabase.from("legal_questions").insert({proceeding_id:proceeding.id,question:legalQuestion});
+    const {error} = await supabase.from("legal_questions").insert({proceeding_id:proceeding.id,question:legalQuestion});
+    if (error) return NextResponse.json({error:"LEGAL_QUESTION_CREATE_FAILED",detail:error.message},{status:500});
+  }
+
+  if (statements.length) {
+    const {error} = await supabase.from("statements").insert(statements.map(statement_text => ({
+      proceeding_id:proceeding.id, speaker_name:"Kullanıcı anlatımı", statement_text, fact_status:"ASSERTED", source_kind:"user_narrative"
+    })));
+    if (error) return NextResponse.json({error:"STATEMENT_CREATE_FAILED",detail:error.message},{status:500});
+  }
+
+  if (claims.length) {
+    const {error} = await supabase.from("claims").insert(claims.map(claim_text => ({
+      proceeding_id:proceeding.id, side:"other", claim_text, fact_status:"ASSERTED"
+    })));
+    if (error) return NextResponse.json({error:"CLAIM_CREATE_FAILED",detail:error.message},{status:500});
+  }
+
+  if (defences.length) {
+    const {error} = await supabase.from("defences").insert(defences.map(defence_text => ({
+      proceeding_id:proceeding.id, side:"other", defence_text, fact_status:"ASSERTED"
+    })));
+    if (error) return NextResponse.json({error:"DEFENCE_CREATE_FAILED",detail:error.message},{status:500});
+  }
+
+  if (requests.length) {
+    const {error} = await supabase.from("requests").insert(requests.map(request_text => ({
+      proceeding_id:proceeding.id, requested_by:"Kullanıcı", request_text
+    })));
+    if (error) return NextResponse.json({error:"REQUEST_CREATE_FAILED",detail:error.message},{status:500});
+  }
+
+  if (evidence.length) {
+    const {error} = await supabase.from("evidence_items").insert(evidence.map(title => ({
+      proceeding_id:proceeding.id, title, evidence_type:"user_declared", fact_status:"UNKNOWN", source_kind:"user_input"
+    })));
+    if (error) return NextResponse.json({error:"EVIDENCE_CREATE_FAILED",detail:error.message},{status:500});
   }
 
   const {data: session, error: sessionError} = await supabase.from("simulation_sessions").insert({
