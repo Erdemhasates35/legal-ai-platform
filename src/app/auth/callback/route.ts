@@ -33,13 +33,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(url);
   }
 
-  // İlk yönetici hesabı: yalnızca ADMIN_BOOTSTRAP_EMAIL ile eşleşen
-  // Google hesabı ve henüz hiç admin yoksa otomatik olarak onaylanır.
-  const { data: { user } } = await supabase.auth.getUser();
-  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL?.trim().toLowerCase();
-  if (user?.email && bootstrapEmail && user.email.toLowerCase() === bootstrapEmail) {
-    await supabase.rpc("bootstrap_admin", { bootstrap_email: bootstrapEmail });
-  }
-
   return NextResponse.redirect(new URL(next, requestUrl.origin));
 }
