@@ -25,6 +25,7 @@ export default async function DashboardPage() {
         </header>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Link href="/courtroom" className="group plasma-card p-6 transition-all hover:border-[hsl(var(--accent-muted))]"><p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--accent))]">Global Courtroom</p><h2 className="mt-3 text-lg font-medium text-[hsl(var(--text-primary))] group-hover:text-[hsl(var(--accent))]">Mahkeme Simülasyonu</h2><p className="mt-2 text-sm text-[hsl(var(--text-secondary))]">Proceeding-first olay, taraf, delil ve çok-ajanlı yargısal değerlendirme.</p></Link>
           <Link href="/dashboard/files" className="group plasma-card p-6 transition-all hover:border-[hsl(var(--accent-muted))]">
             <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--text-muted))]">Free + Pro++</p>
             <h2 className="mt-3 text-lg font-medium text-[hsl(var(--text-primary))] group-hover:text-[hsl(var(--accent))]">Dosya & UYAP</h2>
