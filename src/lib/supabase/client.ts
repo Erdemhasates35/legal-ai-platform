@@ -13,5 +13,9 @@ export function getBrowserClient() {
   );
 }
 
-/** Geriye uyumluluk */
-export const supabase = getBrowserClient();
+/** Geriye uyumluluk: istemci yalnızca ilk gerçek erişimde oluşturulur. */
+export const supabase = new Proxy({} as ReturnType<typeof getBrowserClient>, {
+  get(_target, property) {
+    return getBrowserClient()[property as keyof ReturnType<typeof getBrowserClient>];
+  },
+});
