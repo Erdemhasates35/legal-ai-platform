@@ -16,7 +16,7 @@ const instructions: Record<string, string> = {
 
 function parseJson(value: string) {
   try {
-    return JSON.parse(value.replace(/^\`\`\`json\s*/i, "").replace(/\`\`\`$/, "").trim());
+    return JSON.parse(value.replace(/^```json\s*/i, "").replace(/```$/, "").trim());
   } catch {
     return null;
   }
@@ -32,8 +32,8 @@ function deterministicAssessment(dossier: any, agent: any) {
   return {
     position: "AI sağlayıcısı kullanılamadığı için bu tur yalnızca deterministik CASE CORE bütünlük kontrolüdür; hukuki görüş veya gerçek mahkeme kararı değildir.",
     key_findings: [
-      \`Rol: \${agent.display_name}.\`,
-      \`Katılımcı: \${dossier.participants.length}; beyan: \${dossier.statements.length}; iddia: \${dossier.claims.length}; savunma: \${dossier.defences.length}; delil: \${dossier.evidence.length}.\`,
+      `Rol: ${agent.display_name}.`,
+      `Katılımcı: ${dossier.participants.length}; beyan: ${dossier.statements.length}; iddia: ${dossier.claims.length}; savunma: ${dossier.defences.length}; delil: ${dossier.evidence.length}.`,
       "Kaynak doğrulaması yapılmadı; hiçbir UNKNOWN/ASSERTED kayıt VERIFIED'a dönüştürülmedi.",
     ],
     fact_assessment: facts.map(([status, count]) => ({ status, count })),
