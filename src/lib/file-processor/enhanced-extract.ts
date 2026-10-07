@@ -19,7 +19,7 @@ export async function extractDocumentTextEnhanced(
       }
       return {
         text,
-        method: text.length > 0 ? "utf8-fallback" : "empty",
+        method: text.length > 0 ? "docx-text" : "empty",
         charCount: text.length,
         warnings,
       };
@@ -46,7 +46,7 @@ export async function extractDocumentTextEnhanced(
         : [];
       return {
         text,
-        method: text.length > 0 ? "pdf-stream" : "empty",
+        method: text.length > 0 ? "pdf-library" : "empty",
         charCount: text.length,
         warnings,
       };
