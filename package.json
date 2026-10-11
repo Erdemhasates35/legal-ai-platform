@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": ">=20 <25"
+    "node": ">=20 <27"
   },
   "scripts": {
     "dev": "next dev",
@@ -17,29 +17,34 @@
     "test": "npm run test:deontic && npm run test:verification && npm run test:production"
   },
   "dependencies": {
-    "next": "^14.2.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/server": "^1.9.1",
     "@supabase/ssr": "^0.12.7",
-    "framer-motion": "^11.3.0",
-    "lucide-react": "^0.424.0",
+    "@supabase/supabase-js": "^2.117.3",
+    "approve": "^0.0.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.4.0",
+    "esbuild-wasm": "^0.28.2",
+    "framer-motion": "^11.3.0",
+    "install-scripts": "^1.2.0",
+    "ls": "^1.0.0",
+    "lucide-react": "^0.424.0",
+    "mammoth": "1.13.0",
+    "next": "^14.2.5",
     "pdf-parse": "2.4.5",
-    "mammoth": "1.13.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.5.0",
+    "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.5",
-    "tailwindcss": "^3.4.6",
     "postcss": "^8.4.39",
-    "autoprefixer": "^10.4.19",
-    "tsx": "^4.16.0"
+    "tailwindcss": "^3.4.6",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
   }
 }

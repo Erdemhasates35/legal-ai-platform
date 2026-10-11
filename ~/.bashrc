@@ -1,0 +1,1 @@
+source \~/.legal-ai-env

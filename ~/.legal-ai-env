@@ -1,0 +1,9 @@
+# Legal AI Platform - Güncel Supabase Credentials
+export NEXT_PUBLIC_SUPABASE_URL="https://qxfvpcjvoiantjrkorsa.supabase.co"
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4ZnZwY2p2b2lhbnRqcmtvcnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1ODg4NzQsImV4cCI6MjEwNTE2NDg3NH0.Mw81YgxONncaOi_qeCfjwrkrfF7JjNx2QW6qXr56_TA"
+export SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4ZnZwY2p2b2lhbnRqcmtvcnNhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4OTU4ODg3NCwiZXhwIjoyMTA1MTY0ODc0fQ.9LLSaBvie2gHQU_wf43ZQy-aLm7j5MMIHcZSt1X1fS0"
+export SUPABASE_PUBLISHABLE_KEY="sb_publishable_XIl3JwkBJmBc1Fl2GIHqew_zHggmAjr"
+export SUPABASE_SECRET_KEY="sb_secret_gHdBFzoez1qmiejkMVLOPQ_nWnv32SR"
+export SUPABASE_JWKS_URL="https://qxfvpcjvoiantjrkorsa.supabase.co/auth/v1/.well-known/jwks.json"
+export ADMIN_BOOTSTRAP_EMAIL="sema.erdem35@gmail.com"
+export NEXT_PUBLIC_SITE_URL="https://legal-ai-platform-eta.vercel.app"
