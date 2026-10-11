@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 
-function safeNextPath(value: string | null) {
+function safeNextPath(value: string | null): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
   return value;
+}
+
+function loginError(requestUrl: URL, code: string, description?: string | null) {
+  const url = new URL("/auth/login", requestUrl.origin);
+  url.searchParams.set("error", code);
+  if (description) url.searchParams.set("error_description", description.slice(0, 300));
+  return NextResponse.redirect(url);
 }
 
 export async function GET(request: Request) {
@@ -13,28 +20,17 @@ export async function GET(request: Request) {
   const oauthError = requestUrl.searchParams.get("error");
   const oauthDescription = requestUrl.searchParams.get("error_description");
 
-  if (oauthError) {
-    const url = new URL("/auth/login", requestUrl.origin);
-    url.searchParams.set("error", oauthError);
-    if (oauthDescription) url.searchParams.set("error_description", oauthDescription);
-    return NextResponse.redirect(url);
+  if (oauthError) return loginError(requestUrl, oauthError, oauthDescription);
+  if (!code) return loginError(requestUrl, "missing_code");
+
+  try {
+    const supabase = await createServerClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) return loginError(requestUrl, "code_exchange_failed", error.message);
+
+    return NextResponse.redirect(new URL(next, requestUrl.origin));
+  } catch {
+    return loginError(requestUrl, "code_exchange_failed");
   }
-
-  if (!code) {
-    return NextResponse.redirect(new URL("/auth/login?error=missing_code", requestUrl.origin));
-  }
-
-  const supabase = await createServerClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-  if (error) {
-    const url = new URL("/auth/login", requestUrl.origin);
-    url.searchParams.set("error", "code_exchange_failed");
-    url.searchParams.set("error_description", error.message);
-    return NextResponse.redirect(url);
-  }
-
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const origin = forwardedHost ? `https://${forwardedHost}` : requestUrl.origin;
-  return NextResponse.redirect(new URL(next, origin));
 }
