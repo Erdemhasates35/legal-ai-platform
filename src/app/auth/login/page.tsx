@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { getBrowserClient } from "@/lib/supabase/client";
 
-/**
- * Google Giriş Sayfası
- * Sadece Google OAuth – ekstra form yok, kullanıcıyı yormaz
- */
+function safeNextPath(value: string | null): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  return value;
+}
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -15,21 +16,41 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("error");
     const description = params.get("error_description");
-    if (code) setError(description || `Giriş başarısız: ${code}`);
+
+    if (code) {
+      const messages: Record<string, string> = {
+        missing_code: "OAuth dönüşünde doğrulama kodu gelmedi. Lütfen yeniden giriş yapın.",
+        code_exchange_failed: "Google oturumu doğrulanamadı. Lütfen yeniden giriş yapın.",
+        profile_lookup_failed: "Kullanıcı yetkileri doğrulanamadı. Erişim güvenlik nedeniyle durduruldu.",
+      };
+      setError(messages[code] || description || ("Giriş başarısız: " + code));
+    }
   }, []);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
 
-    const supabase = getBrowserClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback` }
-    });
+    try {
+      const supabase = getBrowserClient();
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const callbackUrl = new URL("/auth/callback", siteUrl);
+      callbackUrl.searchParams.set(
+        "next",
+        safeNextPath(new URLSearchParams(window.location.search).get("next"))
+      );
 
-    if (error) {
-      setError(error.message);
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callbackUrl.toString() },
+      });
+
+      if (oauthError) {
+        setError(oauthError.message);
+        setLoading(false);
+      }
+    } catch {
+      setError("Google girişi başlatılamadı. Supabase URL ve publishable key yapılandırmasını kontrol edin.");
       setLoading(false);
     }
   };
@@ -53,7 +74,7 @@ export default function LoginPage() {
             </svg>
             {loading ? "Yönlendiriliyor…" : "Google ile Giriş Yap"}
           </button>
-          {error && <p className="mt-4 text-center text-sm text-[hsl(var(--danger))]">{error}</p>}
+          {error && <p role="alert" className="mt-4 text-center text-sm text-[hsl(var(--danger))]">{error}</p>}
           <p className="mt-6 text-center text-xs text-[hsl(var(--text-muted))]">Giriş sonrası yönetici onayı gerekir.<br />Onaylanmadan platforma erişim yoktur.</p>
         </div>
       </div>
