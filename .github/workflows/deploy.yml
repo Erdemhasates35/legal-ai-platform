@@ -28,7 +28,7 @@ jobs:
           node-version: "22"
           package-manager-cache: false
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Lint
         run: npm run lint
       - name: Typecheck
@@ -73,7 +73,7 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         if: steps.credentials.outputs.available == 'true'
-        run: npm install
+        run: npm ci
       - name: Verify production build
         if: steps.credentials.outputs.available == 'true'
         run: npm run build

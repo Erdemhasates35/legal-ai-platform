@@ -1,45 +1,16 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-function getRequiredEnv(
-  name: "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
-): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing required Supabase environment variable: ${name}`);
-  return value;
-}
-
-const SUPABASE_URL = getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL");
-const SUPABASE_KEY = getRequiredEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+import { updateSession } from "../utils/supabase/middleware";
 
 const protectedPaths = ["/dashboard", "/admin", "/courtroom"];
 
 function isProtected(pathname: string) {
-  return protectedPaths.some(
-    (path) => pathname === path || pathname.startsWith(path + "/")
-  );
+  return protectedPaths.some((path) => pathname === path || pathname.startsWith(path + "/"));
 }
 
 export async function middleware(request: NextRequest) {
   if (!isProtected(request.nextUrl.pathname)) return NextResponse.next();
 
-  let response = NextResponse.next({ request });
-
-  const supabase = createServerClient(SUPABASE_URL, SUPABASE_KEY, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          request.cookies.set(name, value);
-          response.cookies.set(name, value, options);
-        });
-      },
-    },
-  });
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, response, user } = await updateSession(request);
 
   if (!user) {
     const url = request.nextUrl.clone();
